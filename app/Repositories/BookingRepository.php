@@ -22,6 +22,10 @@ class BookingRepository implements BookingRepositoryInterface
             throw new \Exception('Event not found');
         }
 
+        if($event->quota <= 0) {
+            throw new \Exception('This event quota is not available');
+        }
+
         if($event->quota < $booking['quantity']) {
             throw new \Exception('Booking quantity is more than event quota');
         }

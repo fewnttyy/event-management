@@ -109,6 +109,39 @@ class BookingTest extends TestCase
     }
 
     #[Test]
+    public function test_user_cannot_booking_when_quota_is_not_available()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        try{
+            $event = Event::create([
+                'title' => 'event test',
+                'location' => 'event test',
+                'date' => '2025-09-08',
+                'quota' => '0',
+                'description' => 'event test'
+            ]);
+
+            $eventId = $event->id;
+
+            $bookingData = [
+                'user_id' => $user->id,
+                'event_id' => $eventId,
+                'date' => '2025-09-08',
+                'quantity' => '5',
+            ];
+
+            $this->bookingRepository->bookTicket($eventId, $bookingData);
+            $this->fail('Exception was not thrown when quota event is less than quantity');
+        }catch(Exception $e) {
+            $this->assertEquals('This event quota is not available', $e->getMessage());
+            $event->delete();
+            $user->delete();
+        }
+    }
+
+    #[Test]
     public function test_user_cannot_booking_when_quota_is_less()
     {
         $user = User::factory()->create();
